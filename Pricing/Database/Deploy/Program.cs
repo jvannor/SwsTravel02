@@ -23,7 +23,7 @@ policy.Execute(() => {
 Console.WriteLine("Starting deployment...");
 var dbUp = DeployChanges.To
     .SqlDatabase(csb.ConnectionString)
-    .WithScriptsFromFileSystem("../sql")
+    .WithScriptsFromFileSystem("../SQL")
     .JournalToSqlTable("dbo", "$__dbup_journal")
     .LogToConsole()
     .Build();

@@ -17,7 +17,7 @@ jobs:
           dotnet-version: '6.0.x'
         
       - name: Build and Deploy Database
-        working-directory: ./Pricing/Database/deploy
+        working-directory: ./Pricing/Database/Deploy
         env:
           ConnectionString: ${{ secrets.PRICING_CONNECTION_STRING }}
         run: dotnet build && dotnet run

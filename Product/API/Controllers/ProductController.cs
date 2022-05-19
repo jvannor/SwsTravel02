@@ -6,9 +6,11 @@ public class ProductController: ControllerBase
 {
     public ProductController(
         ProductContext context,
+        IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
         ILogger<ProductController> logger)
     {
         _context = context;
+        _client = serviceBusClientFactory.CreateClient("ProductMessage");
         _logger = logger;
     } 
 
@@ -22,6 +24,25 @@ public class ProductController: ControllerBase
         _context.TravelProducts.Add(product);
         await _context.SaveChangesAsync();
 
+        try
+        {
+            var sender = _client.CreateSender("swsproducttoswspricing");
+            var envelope = new 
+            {
+                To = "Pricing",
+                From = "Product",
+                Subject = "Create",
+                Body = product
+            };
+
+            var message = new ServiceBusMessage(JsonSerializer.Serialize(envelope));
+            await sender.SendMessageAsync(message);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning($"Unexpected integration failure; ${ex.Message}");
+        }
+        
         return CreatedAtAction("GetProduct", new { id = product.TravelProductId }, product);
     }    
 
@@ -74,6 +95,25 @@ public class ProductController: ControllerBase
             }
         }
 
+        try
+        {
+            var sender = _client.CreateSender("swsproducttoswspricing");
+            var envelope = new 
+            {
+                To = "Pricing",
+                From = "Product",
+                Subject = "Update",
+                Body = product
+            };
+
+            var message = new ServiceBusMessage(JsonSerializer.Serialize(envelope));
+            await sender.SendMessageAsync(message);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning($"Unexpected integration failure; ${ex.Message}");
+        }        
+
         return NoContent();
     }
 
@@ -94,6 +134,25 @@ public class ProductController: ControllerBase
         _context.TravelProducts.Remove(product);
         await _context.SaveChangesAsync();
 
+        try
+        {
+            var sender = _client.CreateSender("swsproducttoswspricing");
+            var envelope = new 
+            {
+                To = "Pricing",
+                From = "Product",
+                Subject = "Delete",
+                Body = product
+            };
+
+            var message = new ServiceBusMessage(JsonSerializer.Serialize(envelope));
+            await sender.SendMessageAsync(message);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning($"Unexpected integration failure; ${ex.Message}");
+        }        
+
         return NoContent();
     }
 
@@ -103,5 +162,6 @@ public class ProductController: ControllerBase
     }
 
     private readonly ProductContext _context;
+    private readonly ServiceBusClient _client;
     private readonly ILogger<ProductController> _logger;      
 }

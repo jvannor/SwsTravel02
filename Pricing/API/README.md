@@ -1,0 +1,1 @@
+dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=SwsPricing" Microsoft.EntityFrameworkCore.SqlServer --context PricingContext --context-dir Data --output-dir Models --no-onconfiguring

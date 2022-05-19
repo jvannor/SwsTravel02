@@ -7,101 +7,101 @@ public class PricingController : ControllerBase
     public PricingController(
         PricingContext context,
         ILogger<PricingController> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<PriceComponent>> PostPriceComponent(PriceComponent component)
+    {
+        if (_context.PriceComponents == null)
         {
-            _context = context;
-            _logger = logger;
+            return Problem("Entity set 'PricingContext.PriceComponents' is null.");
+        }
+        _context.PriceComponents.Add(component);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction("GetPriceComponent", new { id = component.PriceComponentId }, component);
+    }  
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<PriceComponent>>> GetPriceComponents()
+    {
+        if (_context.PriceComponents == null)
+        {
+            return NotFound();
         }
 
-        [HttpPost]
-        public async Task<ActionResult<PriceComponent>> PostPriceComponent(PriceComponent component)
+        return await _context.PriceComponents.ToListAsync();
+    }      
+
+    [HttpGet("{id}")]   
+    public async Task<ActionResult<PriceComponent>> GetPriceComponent(int id)
+    {
+        var component = await _context.PriceComponents.FindAsync(id);
+        if (component == null)
         {
-            if (_context.PriceComponents == null)
-            {
-                return Problem("Entity set 'PricingContext.PriceComponents' is null.");
-            }
-            _context.PriceComponents.Add(component);
+            return NotFound();
+        }
+
+        return component;
+    }  
+
+    [HttpPut("{id}")]   
+    public async Task<IActionResult> PutPriceComponent(int id, PriceComponent component)
+    {
+        if (id != component.PriceComponentId)
+        {
+            return BadRequest();
+        }
+
+        _context.Entry(component).State = EntityState.Modified;
+
+        try
+        {
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPriceComponent", new { id = component.PriceComponentId }, component);
-        }  
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PriceComponent>>> GetPriceComponents()
+        }
+        catch(DbUpdateConcurrencyException)
         {
-            if (_context.PriceComponents == null)
+            if (!PriceComponentExists(id))
             {
                 return NotFound();
             }
-
-            return await _context.PriceComponents.ToListAsync();
-        }      
-
-        [HttpGet("{id}")]   
-        public async Task<ActionResult<PriceComponent>> GetPriceComponent(int id)
-        {
-            var component = await _context.PriceComponents.FindAsync(id);
-            if (component == null)
+            else
             {
-                return NotFound();
+                throw;
             }
-
-            return component;
-        }  
-
-        [HttpPut("{id}")]   
-        public async Task<IActionResult> PutPriceComponent(int id, PriceComponent component)
-        {
-            if (id != component.PriceComponentId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(component).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch(DbUpdateConcurrencyException)
-            {
-                if (!PriceComponentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteProduct(int id)
+        return NoContent();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeletePriceComponent(int id)
+    {
+        if (_context.PriceComponents == null)
         {
-            if (_context.PriceComponents == null)
-            {
-                return NotFound();
-            }
-
-            var component = await _context.PriceComponents.FindAsync(id);
-            if (component == null)
-            {
-                return NotFound();
-            }
-
-            _context.PriceComponents.Remove(component);
-            await  _context.SaveChangesAsync();
-
-            return NoContent();
+            return NotFound();
         }
 
-        private bool PriceComponentExists(int id)
+        var component = await _context.PriceComponents.FindAsync(id);
+        if (component == null)
         {
-            return (_context.PriceComponents?.Any(pc => pc.PriceComponentId == id)).GetValueOrDefault();
+            return NotFound();
         }
 
-        private readonly PricingContext _context;
-        private readonly ILogger<PricingController> _logger;
+        _context.PriceComponents.Remove(component);
+        await  _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool PriceComponentExists(int id)
+    {
+        return (_context.PriceComponents?.Any(pc => pc.PriceComponentId == id)).GetValueOrDefault();
+    }
+
+    private readonly PricingContext _context;
+    private readonly ILogger<PricingController> _logger;
 }

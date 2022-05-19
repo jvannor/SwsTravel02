@@ -1,0 +1,39 @@
+name: Build and Deploy Product Workflow
+on: 
+  workflow_dispatch:
+jobs:
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with: 
+          submodules: true
+      
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+        
+      - name: Build and Deploy Database
+        working-directory: ./Product/Database/deploy
+        env:
+          ConnectionString: ${{ secrets.PRODUCT_CONNECTION_STRING }}
+        run: dotnet build && dotnet run
+
+      - name: Build API
+        working-directory: ./Product/API
+        run: dotnet build --configuration Release
+
+      - name: Publish API
+        working-directory: ./Product/API
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/ProductAPI
+
+      - name: Deploy API
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'web6d76'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.PRODUCT_APPSERVICE_PUBLISHPROFILE }}
+          package: ${{ env.DOTNET_ROOT }}/ProductAPI

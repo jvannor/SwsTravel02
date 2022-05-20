@@ -77,6 +77,7 @@ public class ProductController : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("{id}")]  
     public async Task<IActionResult> DeleteProduct(int id)
     {
         if (_context.Products == null)

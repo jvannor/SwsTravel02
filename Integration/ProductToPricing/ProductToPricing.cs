@@ -1,22 +1,26 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Polly;
 using ProductToPricing.Models;
+using ProductToPricing.Services;
 
 namespace ProductToPricing
 {
     public class ProductToPricing
     {
-        public ProductToPricing(HttpClient client, ILoggerFactory loggerFactory)
+        public ProductToPricing(IProductService productService, ILoggerFactory loggerFactory)
         {
-            _client = client;
+            _productService = productService;
             _logger = loggerFactory.CreateLogger<ProductToPricing>();
         }
 
         [Function("ProductToPricing")]
-        public void Run([ServiceBusTrigger("swsproducttoswspricing", Connection = "ProductMessage")] Envelope message)
+        public async Task Run([ServiceBusTrigger("swsproducttoswspricing", Connection = "P2P_ProductMessage")] Envelope message)
         {
             _logger.LogInformation($"ProductToPricing function processing: ${JsonSerializer.Serialize(message)}");
 
@@ -26,36 +30,30 @@ namespace ProductToPricing
             if (message.To.ToUpper() != "PRICING")
                 return;
 
+            if (message.Body == null)
+                return;
+
+            Product product = new Product 
+            {
+                ProductId = message.Body.TravelProductId,
+                ProductName = message.Body.TravelProductName
+            };
+
             switch(message.Subject.ToUpper())
             {
                 case "CREATE":
-                    CreatePricingProduct(message.Body);
+                    await _productService.CreateProduct(product);
                     break;
                 case "UPDATE":
-                    UpdatePricingProduct(message.Body);
+                    await _productService.UpdateProduct(product);
                     break;
                 case "DELETE":
-                    DeletePricingProduct(message.Body);
+                    await _productService.DeleteProduct(product.ProductId);
                     break;
             }
         }
 
-        private void CreatePricingProduct(TravelProduct product)
-        {
-            _logger.LogInformation($"CreatePricingProduct processing: ${JsonSerializer.Serialize(product)}");
-        }
-
-        private void UpdatePricingProduct(TravelProduct product)
-        {
-            _logger.LogInformation($"UpdatePricingProduct processing: ${JsonSerializer.Serialize(product)}");
-        }
-
-        private void DeletePricingProduct(TravelProduct product)
-        {
-            _logger.LogInformation($"DeletePricingProduct processing: ${JsonSerializer.Serialize(product)}");
-        }
-
-        private readonly HttpClient _client;
-        private readonly ILogger _logger;
+        private readonly IProductService _productService;
+        private readonly ILogger<ProductToPricing> _logger;
     }
 }

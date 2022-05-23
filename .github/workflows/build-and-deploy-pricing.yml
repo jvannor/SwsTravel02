@@ -33,7 +33,7 @@ jobs:
       - name: Deploy API
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'webd3ec'
-          slot-name: 'Production'
+          app-name: ${{ secrets.PRICING_APP_NAME }}
+          slot-name: ${{ secrets.PRICING_APP_SLOT_NAME }}
           publish-profile: ${{ secrets.PRICING_APPSERVICE_PUBLISHPROFILE }}
           package: ${{ env.DOTNET_ROOT }}/PricingAPI

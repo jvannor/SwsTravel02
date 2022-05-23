@@ -1,3 +1,5 @@
+using Azure.Messaging.ServiceBus;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,9 +13,9 @@ builder.Services.AddAzureClients(b => b.AddServiceBusClient(builder.Configuratio
     .WithName("ProductMessage")
     .ConfigureOptions(options => 
     {
-        options.RetryOptions.Delay = TimeSpan.FromSeconds(30);
-        options.RetryOptions.MaxDelay = TimeSpan.FromSeconds(300);
-        options.RetryOptions.MaxRetries = 3;
+        options.RetryOptions.Mode = ServiceBusRetryMode.Exponential;
+        options.RetryOptions.MaxRetries = 5;
+        options.RetryOptions.Delay = TimeSpan.FromSeconds(5);
     }));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Configuration;
 using Polly;
 using ProductToPricing.Models;

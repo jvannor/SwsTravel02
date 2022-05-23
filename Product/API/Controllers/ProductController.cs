@@ -55,7 +55,8 @@ public class ProductController: ControllerBase
         }
 
         return await _context.TravelProducts
-            .Include("TravelProduct.FacilityIdGoingToNavigation,TravelProduct.FacilityIdOriginatingFromNavigation")
+            .Include(c => c.FacilityIdGoingToNavigation)
+            .Include(c => c.FacilityIdOriginatingFrom)
             .ToListAsync();
     }
 

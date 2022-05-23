@@ -15,12 +15,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-        
-      - name: Build and Deploy Database
-        working-directory: ./Pricing/Database/Deploy
-        env:
-          ConnectionString: ${{ secrets.PRICING_CONNECTION_STRING }}
-        run: dotnet build && dotnet run
 
       - name: Build Function App
         working-directory: ./Integration/ProductToPricing
@@ -29,6 +23,6 @@ jobs:
       - name: Deploy Function App
         uses: azure/functions-action@v1
         with:
-          app-name: 'TBD'
-          package: ${{ env.DOTNET_ROOT }}/Integration/ProductToPricing
+          app-name: 'fna326'
+          package: ./Integration/ProductToPricing
           publish-profile: ${{ secrets.PRODUCT_TO_PRICING_APPSERVICE_PUBLISHPROFILE }}

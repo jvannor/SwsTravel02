@@ -54,7 +54,9 @@ public class ProductController: ControllerBase
             return NotFound();
         }
 
-        return await _context.TravelProducts.ToListAsync();
+        return await _context.TravelProducts
+            .Include("TravelProduct.FacilityIdGoingToNavigation,TravelProduct.FacilityIdOriginatingFromNavigation")
+            .ToListAsync();
     }
 
     [HttpGet("{id}")]

@@ -20,9 +20,13 @@ jobs:
         working-directory: ./Integration/ProductToPricing
         run: dotnet build --configuration Release
 
+      - name: Publish Function App
+        working-directory: ./Integration/ProductToPricing
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/ProductToPricing
+
       - name: Deploy Function App
         uses: azure/functions-action@v1
         with:
           app-name: 'fna326'
-          package: ./Integration/ProductToPricing
+          package: ${{ env.DOTNET_ROOT }}/ProductToPricing
           publish-profile: ${{ secrets.PRODUCT_TO_PRICING_APPSERVICE_PUBLISHPROFILE }}

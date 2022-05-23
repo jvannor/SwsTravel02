@@ -34,6 +34,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.PRODUCT_APP_NAME }}
-          slot-name: $${{ secrets.PRODUCT_APP_SLOT_NAME }}
+          slot-name: ${{ secrets.PRODUCT_APP_SLOT_NAME }}
           publish-profile: ${{ secrets.PRODUCT_APPSERVICE_PUBLISHPROFILE }}
           package: ${{ env.DOTNET_ROOT }}/ProductAPI
